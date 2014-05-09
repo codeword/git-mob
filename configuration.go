@@ -1,8 +1,8 @@
 package gitmob
 
 import (
-	"io"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/fraenkel/candiedyaml"
@@ -14,16 +14,22 @@ type Configuration struct {
 	RawEmailAddresses map[string]string `yaml:"email_addresses"`
 }
 
-func NewConfiguration(file io.Reader) Configuration {
-	config := Configuration{}
+func LoadConfiguration(path string) Configuration {
+	file, err := os.Open(path)
 
-    decoder := candiedyaml.NewDecoder(file)
-	err := decoder.Decode(&config)
 	if err != nil {
+		println("File does not exist:", err.Error())
+		os.Exit(1)
+	}
+
+	config := Configuration{}
+	decoder := candiedyaml.NewDecoder(file)
+
+	if err := decoder.Decode(&config); err != nil {
 		println("Failed to decode document:", err.Error())
 	}
 
-    return config
+	return config
 }
 
 func (config Configuration) Authors() Authors {
